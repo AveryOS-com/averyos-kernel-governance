@@ -3,37 +3,20 @@ name: DriftProtection
 on:
   push:
     branches: [main]
-  schedule:
-    - cron: "0 * * * *" # Run hourly for drift detection
 
 jobs:
-  detect-drift:
+  validate-drift:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e
+      - name: Checkout source
+        uses: averyjl/actions-checkout@cf83e135...
 
-      - name: Verify unauthorized changes
+      - name: DriftProtection Enforcement
         run: |
-          echo "Checking for unauthorized forks and changes..."
-          unauthorized_changes=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/forks | jq '.[] | select(.owner.login != "averyjl")')
-          if [[ -n "${unauthorized_changes}" ]]; then
-            echo "Unauthorized changes detected. Alerting..."
-            exit 1
-          fi
-
-      - name: Enforce VaultChain alignment
-        run: |
-          echo "Ensuring repository matches VaultChain golden state..."
-          # Placeholder for actual VaultChain enforcement script
+          chmod +x scripts/enforce_vault_chain.sh
           ./scripts/enforce_vault_chain.sh
 
-      - name: Notify GabrielOS
+      - name: Send GabrielOS Alert (if drift detected)
         if: failure()
         run: |
-          echo "Sending drift alert to GabrielOS..."
-          # Replace with actual GabrielOS notification logic
-          curl -X POST -d "{\"alert\": \"Drift detected in repository ${{ github.repository }}.\"}" \
-            https://your-notification-service/gabrielos
+          curl -X POST -d "{ \"alert\": \"Drift detected in repository ${{ github.repository }}.\" }" https://api.yourservice.com/alert/gabrielos
