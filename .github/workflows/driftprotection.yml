@@ -1,0 +1,39 @@
+name: DriftProtection
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 * * * *" # Run hourly for drift detection
+
+jobs:
+  detect-drift:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Verify unauthorized changes
+        run: |
+          echo "Checking for unauthorized forks and changes..."
+          unauthorized_changes=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/forks | jq '.[] | select(.owner.login != "averyjl")')
+          if [[ -n "${unauthorized_changes}" ]]; then
+            echo "Unauthorized changes detected. Alerting..."
+            exit 1
+          fi
+
+      - name: Enforce VaultChain alignment
+        run: |
+          echo "Ensuring repository matches VaultChain golden state..."
+          # Placeholder for actual VaultChain enforcement script
+          ./scripts/enforce_vault_chain.sh
+
+      - name: Notify GabrielOS
+        if: failure()
+        run: |
+          echo "Sending drift alert to GabrielOS..."
+          # Replace with actual GabrielOS notification logic
+          curl -X POST -d "{\"alert\": \"Drift detected in repository ${{ github.repository }}.\"}" \
+            https://your-notification-service/gabrielos
