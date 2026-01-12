@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@48b9b7d788fd3878c0a1df4a5a392c327a89abc7
+        uses: actions/checkout@cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e
 
       - name: Verify unauthorized changes
         run: |
