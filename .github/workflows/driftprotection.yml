@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
-        uses: averyjl/actions-checkout@cf83e135...
+        uses: averyjl/actions-checkout@1a18ca3d2618e24c588dead45f4c8f868c7672a8
 
       - name: DriftProtection Enforcement
         run: |
